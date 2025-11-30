@@ -3,7 +3,7 @@
 Automated 24/7 news video generator that fetches latest news from Indian and global sources, creates audio summaries, and generates video presentations.
 
 ## 📺 Demo Channel
-Check out the generated videos on our YouTube channel: **[News Video Generator](https://www.youtube.com/@NewsVideoGeneratorr)**
+Check out the generated videos on our YouTube channel: **[News Video Generator](https://www.youtube.com/@NewsVideoGenerator)**
 
 ## Features
 

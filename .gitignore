@@ -1,14 +1,21 @@
-# Generated content
+# Generated content - Output directory
 output/
+
+# Generated videos and audio
 *.mp4
 *.mp3
 *.srt
-*.txt
 
-# Python
+# Python cache
 __pycache__/
 *.pyc
 
 # Environment
 .env
 venv/
+
+# Temporary files
+resize_banner.py
+test*.py
+debug*.py
+news_history.json

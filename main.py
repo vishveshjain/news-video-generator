@@ -152,7 +152,86 @@ class NewsVideoGenerator:
             return video_path
             
         except Exception as e:
-            print(f"[ERROR] Error in pipeline: {e}")
+            print(f"[ERROR] Video generation failed: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
+    
+    def generate_short_video(self, hours_back=6, max_stories=4):
+        """
+        Generate a 50-second portrait video for YouTube Shorts/Instagram Reels.
+        Uses fewer stories and shorter summaries than the main video.
+        """
+        try:
+            print(f"\n{'='*60}")
+            print(f"Starting Short Video Generation - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            print(f"{'='*60}\n")
+            
+            # Step 1: Fetch News (reuse same logic)
+            print("[INFO] Fetching latest news for short...")
+            news_items = self.news_fetcher.fetch_news(hours_back=hours_back)
+            
+            if not news_items:
+                print("[WARN] No news items found.")
+                return None
+            
+            print(f"[OK] Fetched {len(news_items)} news items.")
+            
+            # Filter and shuffle
+            used_titles = self.load_history()
+            fresh_news = [item for item in news_items if item['title'] not in used_titles]
+            
+            if not fresh_news:
+                fresh_news = news_items
+            
+            random.shuffle(fresh_news)
+            
+            # Step 2: Create SHORT Script
+            print("\n[INFO] Creating short news script...")
+            script = self.summarizer.create_short_script(fresh_news, max_items=max_stories)
+            print(f"[OK] Short script created ({len(script)} characters)")
+            
+            # Step 3: Generate Audio
+            print("\n[INFO] Generating audio...")
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            audio_filename = f"news_short_{timestamp}.mp3"
+            audio_path, subtitle_path = self.audio_gen.generate_audio(script, audio_filename)
+            print(f"[OK] Audio saved: {audio_path}")
+            print(f"[OK] Subtitles saved: {subtitle_path}")
+            
+            # Step 4: Create PORTRAIT Video
+            print("\n[INFO] Creating portrait video...")
+            video_filename = f"news_short_{timestamp}.mp4"
+            
+            if not os.path.exists(self.anchor_image):
+                print(f"[WARN] Anchor image not found")
+                return audio_path
+            
+            # Use portrait video generator
+            portrait_gen = VideoGenerator(output_dir="output/videos", orientation="portrait")
+            
+            video_path = portrait_gen.create_video(
+                audio_path=audio_path,
+                anchor_image_path=self.anchor_image,
+                headline_text="Latest News",
+                output_filename=video_filename,
+                subtitle_path=subtitle_path
+            )
+            print(f"[OK] Short video saved: {video_path}")
+            
+            # Save to history
+            used_titles = [item['title'] for item in fresh_news[:max_stories]]
+            self.save_to_history(used_titles)
+            print(f"[INFO] Saved {len(used_titles)} story titles to history")
+            
+            print(f"\n{'='*60}")
+            print("Short video generated successfully!")
+            print(f"{'='*60}\n")
+            
+            return video_path
+            
+        except Exception as e:
+            print(f"[ERROR] Short video generation failed: {e}")
             import traceback
             traceback.print_exc()
             return None
@@ -166,7 +245,10 @@ class NewsVideoGenerator:
         
         while True:
             try:
+                # Generate both landscape and portrait videos
                 self.generate_news_video()
+                self.generate_short_video()
+                
                 print(f"\nSleeping for {interval_minutes} minutes...")
                 time.sleep(interval_minutes * 60)
             except KeyboardInterrupt:
@@ -180,9 +262,10 @@ class NewsVideoGenerator:
 if __name__ == "__main__":
     generator = NewsVideoGenerator()
     
-    # For testing, run once
-    print("Running single generation test...")
+    # For testing, run once - generates both formats
+    print("Running single generation test (both formats)...")
     generator.generate_news_video(hours_back=24, max_stories=15)
+    generator.generate_short_video(hours_back=24, max_stories=4)
     
     # Uncomment below to run continuously
     # generator.run_continuous(interval_minutes=60)

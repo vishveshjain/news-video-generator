@@ -49,6 +49,46 @@ class Summarizer:
         script_parts.append("Stay tuned for more updates.")
         
         return "\n\n".join(script_parts)
+    
+    def create_short_script(self, news_items, max_items=4):
+        """
+        Create a shorter news script for portrait videos (~50 seconds).
+        Uses fewer items and shorter summaries.
+        """
+        if not news_items:
+            return ""
+        
+        script_parts = []
+        
+        # Shorter intro
+        script_parts.append("Today's top stories.")
+        script_parts.append("")  # Pause
+        
+        # Process each news item with shorter summaries
+        for i, item in enumerate(news_items[:max_items], 1):
+            script_parts.append(f"Story {i}.")
+            script_parts.append(item['title'])
+            
+            # Shorter summary - use first 2 sentences only
+            summary = item.get('summary', '')
+            if summary:
+                sentences = summary.split('.')
+                sentences = [s.strip() for s in sentences if s.strip()]
+                
+                # Use only 2 sentences for shorts
+                summary_text = '. '.join(sentences[:2])
+                if summary_text and not summary_text.endswith('.'):
+                    summary_text += '.'
+                
+                if summary_text:
+                    script_parts.append(summary_text)
+            
+            script_parts.append("")  # Pause between stories
+        
+        # Shorter outro
+        script_parts.append("Stay tuned for more.")
+        
+        return "\n\n".join(script_parts)
 
 if __name__ == "__main__":
     # Test

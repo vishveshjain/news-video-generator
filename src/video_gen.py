@@ -8,11 +8,19 @@ from PIL import Image, ImageDraw, ImageFont
 import os
 
 class VideoGenerator:
-    def __init__(self, output_dir="output/videos"):
+    def __init__(self, output_dir="output/videos", orientation="landscape"):
         self.output_dir = output_dir
         os.makedirs(self.output_dir, exist_ok=True)
-        self.width = 1920
-        self.height = 1080
+        
+        # Set dimensions based on orientation
+        if orientation == "portrait":
+            self.width = 1080
+            self.height = 1920
+        else:  # landscape
+            self.width = 1920
+            self.height = 1080
+        
+        self.orientation = orientation
 
     def create_video(self, audio_path, anchor_image_path, headline_text, output_filename="news_video.mp4", subtitle_path=None):
         """

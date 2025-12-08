@@ -2,6 +2,8 @@ requests
 beautifulsoup4
 feedparser
 edge-tts
+gTTS
 moviepy
 pillow
 ffmpeg-python
+
